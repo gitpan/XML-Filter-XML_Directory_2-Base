@@ -9,15 +9,6 @@ XML::Filter::XML_Directory_2::Base - base class for creating XML::Directory to s
  package XML::Filter::XML_Directory_2Foo;
  use base qw (XML::Filter::XML_Directory_2::Base);
 
- sub start_element {
-   my $self = shift;
-   my $data = shift;
-
-   $self->on_enter_start_element($data) || return 0;
-
-   # do stuff here...
- }
-
 =head1 DESCRIPTION
 
 Base class for creating XML::Directory to something else SAX filters.
@@ -31,11 +22,10 @@ use strict;
 
 use Carp;
 use Exporter;
-use MIME::Types;
 use Digest::MD5 qw (md5_hex);
-use XML::Filter::XML_Directory_Pruner '1.1';
+use XML::Filter::XML_Directory_Pruner '1.2';
 
-$XML::Filter::XML_Directory_2::Base::VERSION   = '1.3';
+$XML::Filter::XML_Directory_2::Base::VERSION   = '1.4';
 @XML::Filter::XML_Directory_2::Base::ISA       = qw ( XML::Filter::XML_Directory_Pruner );
 @XML::Filter::XML_Directory_2::Base::EXPORT    = qw ();
 @XML::Filter::XML_Directory_2::Base::EXPORT_OK = qw ();
@@ -46,7 +36,7 @@ $XML::Filter::XML_Directory_2::Base::VERSION   = '1.3';
 
 This is a simple helper method designed to save typing. 
 
-Value arguments are 
+Value arguments are
 
 =over
 
@@ -337,44 +327,6 @@ sub make_link {
   return $link;
 }
 
-=head2 $pkg->mtype($file)
-
-Return the media type, as defined by the I<MIME::Types> package, associated with I<$file>.
-
-=cut
-
-sub mtype {
-  my $self  = shift;
-  my $fname = shift;
-
-  #
-
-  $fname =~ /^(.*)\.([^\.]+)$/;
-  if (! $2) { return undef; }
-
-  if (exists($self->{__PACKAGE__.'__typeof'}{$2})) {
-    return $self->{__PACKAGE__.'__typeof'}{$2};
-  }
-
-  $self->{__PACKAGE__.'__mtypes'} ||= MIME::Types->new()
-    || return undef;
-
-
-  #
-
-  my $mime  = $self->{__PACKAGE__.'__mtypes'}->mimeTypeOf($2);
-
-  if (! $mime) {
-    $self->{__PACKAGE__.'__typeof'}{$2} = undef;
-    return $self->{__PACKAGE__.'__typeof'}{$2};
-  }
-
-  #
-
-  $self->{__PACKAGE__.'__typeof'}{$2} = $mime->mediaType();
-  return $self->{__PACKAGE__.'__typeof'}{$2};
-}
-
 =head2 $pkg->on_enter_start_element(\%data)
 
 This method should be called as the first action in your class' I<start_element> method. It will perform a number of helper actions, like keeping track of the current node level and the absolute path of the current document.
@@ -400,8 +352,8 @@ sub on_enter_start_element {
 
   if ($data->{Name} =~ /^(directory|file)$/) {
     $self->{__PACKAGE__.'__'.$1} ++;
-    # map { print " "; } (0..$self->{__PACKAGE__.'__'.$1});
-    # print $self->{__PACKAGE__.'__'.$1} ." ($1) $data->{Attributes}->{'{}name'}->{Value}\n";
+#    map { print " "; } (0..$self->{__PACKAGE__.'__'.$1});
+#    print $self->{__PACKAGE__.'__'.$1} ." ($1) $data->{Attributes}->{'{}name'}->{Value} ".__PACKAGE__."\n";
   }
 
   #
@@ -420,9 +372,10 @@ sub on_enter_start_element {
 
 	$self->{__PACKAGE__.'__start'} = $self->current_level();
 	$self->grow_cwd($data);
-	return 1;
-      }
 
+	$self->compare($data);
+	($self->skip_level()) ? return 0 : return 1;
+      }
     }
 
   }
@@ -538,11 +491,11 @@ sub prune_cwd {
 
 =head1 VERSION
 
-1.3
+1.4
 
 =head1 DATE
 
-July 03, 2002
+July 05, 2002
 
 =head1 AUTHOR
 

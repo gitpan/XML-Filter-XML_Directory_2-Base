@@ -1,5 +1,15 @@
 Revision history for Perl extension XML::Filter::XML_Directory_2::Base
 
+1.4	 Fri Jul 05 2002
+
+	 - Added check to $pkg->compare($data) when excluding root (duh)
+
+	 - Removed $pkg->mtype - now package method in XML::Filter::XML_Directory_Pruner
+
+	 - Updated Makefile.PL accordingly
+
+	 - Upped requirement for XML::Filter::XML_Directory_Pruner to 1.2
+
 1.3	 Wed Jul 03 2002
 
 	 - Added $pkg->current_location()
