@@ -1,5 +1,9 @@
 Revision history for Perl extension XML::Filter::XML_Directory_2::Base
 
+1.2	 Wed Jul 03 2002
+
+	 - Ack! Fixed a bug with the way exclude_root was being interpreted because Ima::Moron and forgot that there might be files might also be the first items in a directory.
+
 1.1	 Wed Jul 03 2002
 
 	 - Added $pkg->exclude_root()

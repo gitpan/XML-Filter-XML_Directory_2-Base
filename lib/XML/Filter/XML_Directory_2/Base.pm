@@ -35,7 +35,7 @@ use MIME::Types;
 use Digest::MD5 qw (md5_hex);
 use XML::Filter::XML_Directory_Pruner '1.1';
 
-$XML::Filter::XML_Directory_2::Base::VERSION   = '1.1';
+$XML::Filter::XML_Directory_2::Base::VERSION   = '1.2';
 @XML::Filter::XML_Directory_2::Base::ISA       = qw ( XML::Filter::XML_Directory_Pruner );
 @XML::Filter::XML_Directory_2::Base::EXPORT    = qw ();
 @XML::Filter::XML_Directory_2::Base::EXPORT_OK = qw ();
@@ -377,24 +377,26 @@ sub on_enter_start_element {
       $self->{__PACKAGE__.'__head'} = 1;
   }
 
-  if ($data->{Name} eq "directory") {
-    $self->{__PACKAGE__.'__directory'} ++;
-    # map { print " "; } (0..$self->{__PACKAGE__.'__directory'});
-    # print $self->{__PACKAGE__.'__directory'} ." $data->{Attributes}->{'{}name'}->{Value}\n";
+  if ($data->{Name} =~ /^(directory|file)$/) {
+    $self->{__PACKAGE__.'__'.$1} ++;
+    # map { print " "; } (0..$self->{__PACKAGE__.'__'.$1});
+    # print $self->{__PACKAGE__.'__'.$1} ." ($1) $data->{Attributes}->{'{}name'}->{Value}\n";
   }
 
   #
 
-  if ((! $self->{__PACKAGE__.'__start'}) && ($data->{Name} eq "directory")) {
+  if ((! $self->{__PACKAGE__.'__start'}) && ($data->{Name} =~ /^(file|directory)$/)) {
 
     if (! exists($self->{__PACKAGE__.'__includeroot'})) {
       $self->{__PACKAGE__.'__start'} = $self->current_level();
       return 1;
     }
-    
+
     else {
 
-      if ((! $self->{__PACKAGE__.'__includeroot'}) && ($self->{__PACKAGE__.'__directory'} == 2)) {
+      if ((! $self->{__PACKAGE__.'__includeroot'}) &&
+	  (($self->{__PACKAGE__.'__file'} == 1) || ($self->{__PACKAGE__.'__directory'} == 2))) {
+
 	$self->{__PACKAGE__.'__start'} = $self->current_level();
 	$self->grow_cwd($data);
 	return 1;
@@ -450,8 +452,8 @@ sub on_exit_end_element {
     $self->prune_cwd($data);
   }
 
-  if ($data->{Name} eq "directory") {
-    $self->{__PACKAGE__.'__directory'} --;
+  if ($data->{Name} =~ /^(directory|file)$/) {
+    $self->{__PACKAGE__.'__'.$1} --;
   }
 
   $self->SUPER::on_exit_end_element($data);
@@ -515,7 +517,7 @@ sub prune_cwd {
 
 =head1 VERSION
 
-1.1
+1.2
 
 =head1 DATE
 
