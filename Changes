@@ -1,5 +1,9 @@
 Revision history for Perl extension XML::Filter::XML_Directory_2::Base
 
+1.4.2	 Mon Jul 08 2002
+
+	 - Forgot to remove debugging output. Ach!
+
 1.4.1	 Sun Jul 07 2002
 
 	 - Fixed a bug where the cwd was not being pruned when the first item in a directory was flagged for pruning.
