@@ -35,7 +35,7 @@ use MIME::Types;
 use Digest::MD5 qw (md5_hex);
 use XML::Filter::XML_Directory_Pruner '1.1';
 
-$XML::Filter::XML_Directory_2::Base::VERSION   = '1.0';
+$XML::Filter::XML_Directory_2::Base::VERSION   = '1.1';
 @XML::Filter::XML_Directory_2::Base::ISA       = qw ( XML::Filter::XML_Directory_Pruner );
 @XML::Filter::XML_Directory_2::Base::EXPORT    = qw ();
 @XML::Filter::XML_Directory_2::Base::EXPORT_OK = qw ();
@@ -87,6 +87,25 @@ sub attributes {
 
 =head1 OBJECT METHODS
 
+=head2 $pkg->exclude_root($bool)
+
+By default, XML::Directory will include the directory you pass to the I<XML::Directory(::SAX)::parse_dir> method. 
+
+You can use this method to instruct your filter to only include the contents of the root directory and not the directory itself.
+
+=cut
+
+sub exclude_root {
+  my $self = shift;
+  my $bool = shift;
+
+  if (defined($bool)) {
+    $self->{__PACKAGE__.'__includeroot'} = ($bool) ? 0 : 1;
+  }
+
+  return $self->{__PACKAGE__.'__includeroot'};
+}
+
 =head2 $pkg->start_level()
 
 Read-only.
@@ -118,10 +137,6 @@ Define one or more valid SAX2 thingies to be called when your package encounters
 =item *
 
 Must inherit from XML::SAX::Base.
-
-=item *
-
-It's handler must be the same one passed to your class.
 
 =item *
 
@@ -178,11 +193,6 @@ sub set_handlers {
 
   foreach ($self->handler_events()) {
     next if (! $args->{$_});
-
-    if (! UNIVERSAL::isa($args->{$_},"XML::SAX::Base")) {
-      carp "Handler must be derived from XML::SAX::Base";
-      next;
-    }
 
     if (! UNIVERSAL::can($args->{$_},"parse_uri")) {
       carp "Handler must define a 'parse_uri' method.\n";
@@ -367,10 +377,34 @@ sub on_enter_start_element {
       $self->{__PACKAGE__.'__head'} = 1;
   }
 
-  if ((! $self->{__PACKAGE__.'__start'}) && ($data->{Name} eq "directory")) {
-    $self->{__PACKAGE__.'__start'} = $self->current_level();
-    return 1;
+  if ($data->{Name} eq "directory") {
+    $self->{__PACKAGE__.'__directory'} ++;
+    # map { print " "; } (0..$self->{__PACKAGE__.'__directory'});
+    # print $self->{__PACKAGE__.'__directory'} ." $data->{Attributes}->{'{}name'}->{Value}\n";
   }
+
+  #
+
+  if ((! $self->{__PACKAGE__.'__start'}) && ($data->{Name} eq "directory")) {
+
+    if (! exists($self->{__PACKAGE__.'__includeroot'})) {
+      $self->{__PACKAGE__.'__start'} = $self->current_level();
+      return 1;
+    }
+    
+    else {
+
+      if ((! $self->{__PACKAGE__.'__includeroot'}) && ($self->{__PACKAGE__.'__directory'} == 2)) {
+	$self->{__PACKAGE__.'__start'} = $self->current_level();
+	$self->grow_cwd($data);
+	return 1;
+      }
+
+    }
+
+  }
+
+  #
 
   if (! $self->{__PACKAGE__.'__start'}) {
     return 0;
@@ -414,6 +448,10 @@ sub on_exit_end_element {
 
   unless ($self->skip_level()) {
     $self->prune_cwd($data);
+  }
+
+  if ($data->{Name} eq "directory") {
+    $self->{__PACKAGE__.'__directory'} --;
   }
 
   $self->SUPER::on_exit_end_element($data);
@@ -477,11 +515,11 @@ sub prune_cwd {
 
 =head1 VERSION
 
-1.0
+1.1
 
 =head1 DATE
 
-July 02, 2002
+July 03, 2002
 
 =head1 AUTHOR
 
