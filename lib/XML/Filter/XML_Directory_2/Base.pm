@@ -23,9 +23,9 @@ use strict;
 use Carp;
 use Exporter;
 use Digest::MD5 qw (md5_hex);
-use XML::Filter::XML_Directory_Pruner '1.2';
+use XML::Filter::XML_Directory_Pruner '1.3';
 
-$XML::Filter::XML_Directory_2::Base::VERSION   = '1.4.2';
+$XML::Filter::XML_Directory_2::Base::VERSION   = '1.4.3';
 @XML::Filter::XML_Directory_2::Base::ISA       = qw ( XML::Filter::XML_Directory_Pruner );
 @XML::Filter::XML_Directory_2::Base::EXPORT    = qw ();
 @XML::Filter::XML_Directory_2::Base::EXPORT_OK = qw ();
@@ -216,13 +216,13 @@ sub set_handlers {
   return 1;
 }
 
-=head2 $pkg->get_handler($event_name)
+=head2 $pkg->retrieve_handler($event_name)
 
 Returns the handler (object) associated with I<$event_name>
 
 =cut
 
-sub get_handler {
+sub retrieve_handler {
   my $self = shift;
   return $self->{__PACKAGE__.'__handlers'}{$_[0]};
 }
@@ -265,13 +265,13 @@ sub set_callbacks {
   return 1;
 }
 
-=head2 $pkg->get_callback($event_name)
+=head2 $pkg->retrieve_callback($event_name)
 
 Return the callback (code reference) associated with I<$event_name>.
 
 =cut
 
-sub get_callback {
+sub retrieve_callback {
   my $self = shift;
   return $self->{__PACKAGE__.'__callbacks'}{$_[0]};
 }
@@ -320,7 +320,7 @@ sub make_link {
 
   my $link = $self->build_uri($data);
 
-  if (my $c = $self->get_callback("link")) {
+  if (my $c = $self->retrieve_callback("link")) {
     $link = &$c($link);
   }
 
@@ -471,6 +471,7 @@ sub grow_cwd {
 
   if ($data->{Name} eq "directory") {
     $self->{__PACKAGE__.'__cwd'} .= "/$data->{Attributes}->{'{}name'}->{Value}";
+    # print STDERR $self->{__PACKAGE__.'__cwd'}."\n";
   }
 
   return 1;
@@ -490,18 +491,20 @@ sub prune_cwd {
 
   if ($data->{Name} eq "directory") {
     $self->{__PACKAGE__.'__cwd'} =~ s/^(.*)\/([^\/]+)$/$1/;
+    # print STDERR "[prune] ".$self->{__PACKAGE__.'__cwd'}."\n";
   }
+
 
   return 1;
 }
 
 =head1 VERSION
 
-1.4.2
+1.4.3
 
 =head1 DATE
 
-July 08, 2002
+July 20, 2002
 
 =head1 AUTHOR
 
