@@ -25,7 +25,7 @@ use Exporter;
 use Digest::MD5 qw (md5_hex);
 use XML::Filter::XML_Directory_Pruner '1.3';
 
-$XML::Filter::XML_Directory_2::Base::VERSION   = '1.4.3';
+$XML::Filter::XML_Directory_2::Base::VERSION   = '1.4.4';
 @XML::Filter::XML_Directory_2::Base::ISA       = qw ( XML::Filter::XML_Directory_Pruner );
 @XML::Filter::XML_Directory_2::Base::EXPORT    = qw ();
 @XML::Filter::XML_Directory_2::Base::EXPORT_OK = qw ();
@@ -76,6 +76,32 @@ sub attributes {
 }
 
 =head1 OBJECT METHODS
+
+=head2 $pkg->encoding($type)
+
+=cut
+
+sub encoding {
+  my $self = shift;
+  my $type = shift;
+
+  if ($type) {
+    $self->{__PACKAGE__.'__type'} = $type;
+  }
+
+  return $self->{__PACKAGE__.'__type'} || "UTF-8";
+}
+
+=head2 $pkg->set_encoding($type)
+
+Alias for I<encoding>
+
+=cut
+
+sub set_encoding {
+  my $self = shift;
+  $self->encoding(@_);
+}
 
 =head2 $pkg->exclude_root($bool)
 
@@ -500,11 +526,11 @@ sub prune_cwd {
 
 =head1 VERSION
 
-1.4.3
+1.4.4
 
 =head1 DATE
 
-July 20, 2002
+July 22, 2002
 
 =head1 AUTHOR
 

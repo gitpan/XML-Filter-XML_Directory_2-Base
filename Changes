@@ -1,10 +1,14 @@
 Revision history for Perl extension XML::Filter::XML_Directory_2::Base
 
+1.4.4	 Mon Jul 22 2003
+
+	 - Added 'set_encoding' and 'encoding' methods
+
 1.4.3	 Sat Jul 20 2002
 
 	 - Renamed 'get_handler' as 'retrieve_handler'
 
-	 - Renamed 'get_callback' as 'retrieve_handler'
+	 - Renamed 'get_callback' as 'retrieve_callback'
 
 	 - Upped requirement for XML::Filter::XML_Directory_Pruner to 1.3
 
