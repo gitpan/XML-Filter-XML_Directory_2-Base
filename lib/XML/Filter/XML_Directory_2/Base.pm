@@ -25,7 +25,7 @@ use Exporter;
 use Digest::MD5 qw (md5_hex);
 use XML::Filter::XML_Directory_Pruner '1.2';
 
-$XML::Filter::XML_Directory_2::Base::VERSION   = '1.4';
+$XML::Filter::XML_Directory_2::Base::VERSION   = '1.4.1';
 @XML::Filter::XML_Directory_2::Base::ISA       = qw ( XML::Filter::XML_Directory_Pruner );
 @XML::Filter::XML_Directory_2::Base::EXPORT    = qw ();
 @XML::Filter::XML_Directory_2::Base::EXPORT_OK = qw ();
@@ -284,6 +284,10 @@ Returns an MD5 hash of the path, relative to the root, for the current file
 
 sub generate_id {
   my $self = shift;
+  print STDERR "GENERATE ID FOR ".$self->{__PACKAGE__.'__loc'}."\n";
+  my $id = "ID".&md5_hex($self->{__PACKAGE__.'__loc'});
+  print STDERR "ID IS $id\n";
+  return $id;
   return "ID".&md5_hex($self->{__PACKAGE__.'__loc'});
 }
 
@@ -374,7 +378,13 @@ sub on_enter_start_element {
 	$self->grow_cwd($data);
 
 	$self->compare($data);
-	($self->skip_level()) ? return 0 : return 1;
+
+	if (! $self->skip_level()) {
+	  return 1;
+	}
+
+	$self->prune_cwd($data);
+	return 0;
       }
     }
 
@@ -491,11 +501,11 @@ sub prune_cwd {
 
 =head1 VERSION
 
-1.4
+1.4.1
 
 =head1 DATE
 
-July 05, 2002
+July 07, 2002
 
 =head1 AUTHOR
 
