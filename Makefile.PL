@@ -14,6 +14,7 @@ WriteMakefile(
 				 MIME::Types                       => '0.4',
 				 Digest::MD5                       => '0',
 				 Carp                              => '0',
+				 File::Basename                    => '0',
 				},
 	      dist	        => {COMPRESS => 'gzip', SUFFIX => 'tar.gz'},
 );

@@ -35,7 +35,7 @@ use MIME::Types;
 use Digest::MD5 qw (md5_hex);
 use XML::Filter::XML_Directory_Pruner '1.1';
 
-$XML::Filter::XML_Directory_2::Base::VERSION   = '1.2';
+$XML::Filter::XML_Directory_2::Base::VERSION   = '1.3';
 @XML::Filter::XML_Directory_2::Base::ISA       = qw ( XML::Filter::XML_Directory_Pruner );
 @XML::Filter::XML_Directory_2::Base::EXPORT    = qw ();
 @XML::Filter::XML_Directory_2::Base::EXPORT_OK = qw ();
@@ -126,6 +126,27 @@ Read-only.
 sub cwd {
   my $self = shift;
   return $self->{__PACKAGE__.'__cwd'};
+}
+
+=head2 $pkg->current_directory()
+
+Short-cut (ahem) for $pkg->cwd()
+
+=cut
+
+sub current_directory {
+  return $_[0]->cwd();
+}
+
+=head2 $pkg->current_location()
+
+Returns the current location relative to the directory root
+
+=cut
+
+sub current_location {
+  my $self = shift;
+  return $self->{__PACKAGE__.'__loc'};
 }
 
 =head2 $pkg->set_handlers(\%args)
@@ -517,7 +538,7 @@ sub prune_cwd {
 
 =head1 VERSION
 
-1.2
+1.3
 
 =head1 DATE
 
